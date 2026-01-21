@@ -1,0 +1,18 @@
+# --- Captura e Crawling ---
+google-search-results>=2.4.2  # Biblioteca oficial SerpApi (substitui o 'serpapi' antigo)
+newspaper3k>=0.2.8
+lxml_html_clean>=0.1.0        # Necessário para segurança e limpeza de HTML no newspaper
+
+# --- Inteligência Artificial ---
+openai>=1.0.0                 # Versão moderna com suporte a JSON Mode e modelos 4o
+
+# --- Processamento e Banco de Dados ---
+pandas>=2.0.0                  # Manipulação de dados/tabulares
+sqlalchemy>=2.0.0             # ORM para gerenciar o SQLite/PostgreSQL com segurança
+psycopg2-binary>=2.9.0        # Driver PostgreSQL recomendado para SQLAlchemy
+python-dotenv>=1.0.0          # Gestão de variáveis de ambiente (.env)
+openpyxl>=3.1.0               # Suporte para leitura/escrita de Excel
+
+# --- Utilidades ---
+holidays>=0.30                # Calendário de feriados brasileiros
+requests>=2.31.0
