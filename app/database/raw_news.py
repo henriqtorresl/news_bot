@@ -31,7 +31,7 @@ def insert_raw_news(news_item):
 def get_unclassified_news():
 	db = Session()
 	query = text("""
-		SELECT id, raw_content FROM raw_news WHERE is_relevant IS NULL
+		SELECT id, raw_content, url FROM raw_news WHERE is_relevant IS NULL
 	""")
 	try:
 		result = db.execute(query)
