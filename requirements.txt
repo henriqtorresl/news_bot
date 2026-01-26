@@ -16,3 +16,4 @@ openpyxl>=3.1.0               # Suporte para leitura/escrita de Excel
 # --- Utilidades ---
 holidays>=0.30                # Calendário de feriados brasileiros
 requests>=2.31.0
+selenium>=4.0.0
