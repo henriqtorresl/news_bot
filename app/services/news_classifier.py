@@ -67,6 +67,23 @@ def classify_news_relevance(news_list, user_examples=None):
     return results
 
 
+def filter_out_portugal_news(list):
+    # Filtra notícias de Portugal (domínio .pt)
+    filtered_list = []
+    for news in list:
+        url = news.get('url', '')
+        if not url:
+            filtered_list.append(news)
+            continue
+        # Remove se domínio termina com .pt ou contém .pt/
+        if re.search(r'\.pt([/\:]|$)', url):
+            logger.info(f"Notícia ignorada por domínio .pt: {url}")
+            continue
+        filtered_list.append(news)
+    
+    return filtered_list
+
+
 def classify_and_update_all(user_examples=None):
     """
     Busca notícias não classificadas, classifica com IA e atualiza no banco.
@@ -76,7 +93,10 @@ def classify_and_update_all(user_examples=None):
     if not news_list:
         logger.info("Nenhuma notícia nova para classificar.")
         return
-    results = classify_news_relevance(news_list, user_examples)
+
+    filtered_news_list = filter_out_portugal_news(news_list)
+
+    results = classify_news_relevance(filtered_news_list, user_examples)
     for r in results:
         update_news_relevance(r['id'], r['relevance'], r['context'])
     logger.info(f"{len(results)} notícias classificadas e atualizadas.")
