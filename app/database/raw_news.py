@@ -82,3 +82,19 @@ def get_relevant_news():
 		return []
 	finally:
 		db.close()
+
+
+def delete_news(id):
+	db = Session()
+	query = text("""
+		DELETE FROM raw_news WHERE id = :id
+	""")
+	try:
+		db.execute(query, {"id": id})
+		db.commit()
+		logger.info(f"Notícia id={id} deletada.")
+	except Exception as e:
+		logger.error(f"Erro ao buscar notícias não classificadas: {e}")
+		return []
+	finally:
+		db.close()
