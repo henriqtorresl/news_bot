@@ -28,19 +28,24 @@ def group_news_by_theme(news_list):
         prompt += f"ID: {n['id']}\nTítulo: {n['title']}\nConteúdo: {n['raw_content'][:500]}\n---\n"
     try:
         response = client.chat.completions.create(
-            model="gpt-4o",
+            model="gpt-5.1",
             messages=[{"role": "system", "content": "Você é especialista em infraestrutura pública."},
                       {"role": "user", "content": prompt}],
-            max_tokens=2048,
+            max_completion_tokens=2048,
             temperature=0.2,
         )
         result = response.choices[0].message.content.strip()
+        logger.info(f"Resposta bruta da IA para agrupamento: {result}")
         match = re.search(r"\[.*\]", result, re.DOTALL)
         if match:
             result_json_str = match.group(0)
         else:
             result_json_str = result
-        groups = json.loads(result_json_str)
+        try:
+            groups = json.loads(result_json_str)
+        except Exception as e:
+            logger.error(f"Erro ao fazer json.loads da resposta da IA: {e}\nConteúdo recebido: {result_json_str}")
+            return []
         return groups
     except Exception as e:
         logger.error(f"Erro ao agrupar notícias por tema: {e}")
@@ -80,12 +85,14 @@ def process_and_save_relevant_news():
             f"Responda no formato: HEADLINE | RESUMO\n"
             f"Notícias:\n" + '\n'.join(headlines) + '\n' + '\n'.join(summaries)
         )
+        headline = ""
+        ai_summary = ""
         try:
             response = client.chat.completions.create(
-                model="gpt-4o",
+                model="gpt-5.1",
                 messages=[{"role": "system", "content": "Você é especialista em infraestrutura pública."},
                           {"role": "user", "content": prompt}],
-                max_tokens=300,
+                max_completion_tokens=300,
                 temperature=0.5,
             )
             result = response.choices[0].message.content.strip()
@@ -94,6 +101,9 @@ def process_and_save_relevant_news():
             if match:
                 headline = match.group(1).strip()
                 ai_summary = match.group(2).strip()
+            else:
+                headline = result[:120]
+                ai_summary = result
         except Exception as e:
             headline = f"Erro IA: {e}"
             ai_summary = f"Erro IA: {e}"

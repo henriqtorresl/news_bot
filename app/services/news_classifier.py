@@ -32,12 +32,12 @@ def classify_news_relevance(news_list, user_examples=None):
         prompt += f"\nNotícia:\n{news['raw_content']}\n"
         try:
             response = client.chat.completions.create(
-                model="gpt-4o",
+                model="gpt-5.1",
                 messages=[
                     {"role": "system", "content": "Você é especialista em infraestrutura pública."},
                     {"role": "user", "content": prompt}
                 ],
-                max_tokens=256,
+                max_completion_tokens=256,
                 temperature=0.2,
             )
             result = response.choices[0].message.content.strip()
