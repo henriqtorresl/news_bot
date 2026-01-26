@@ -5,7 +5,7 @@ from openai import OpenAI
 
 from app.config.environments import env
 from app.config.logs import logger
-from app.database.raw_news import get_unclassified_news, update_news_relevance
+from app.database.raw_news import get_unclassified_news, update_news_relevance, delete_news
 
 
 client = OpenAI(api_key=env.OPENAI_API_KEY)
@@ -78,6 +78,10 @@ def filter_out_portugal_news(list):
         # Remove se domínio termina com .pt ou contém .pt/
         if re.search(r'\.pt([/\:]|$)', url):
             logger.info(f"Notícia ignorada por domínio .pt: {url}")
+            
+            id = news.get('id', '');
+            delete_news(id)
+
             continue
         filtered_list.append(news)
     
