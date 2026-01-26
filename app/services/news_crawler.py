@@ -4,6 +4,8 @@ from datetime import datetime, timedelta
 import requests
 from serpapi import GoogleSearch
 from newspaper import Article
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 
 from app.config.logs import logger
 from app.config.environments import env
@@ -31,30 +33,46 @@ def convert_relative_time(value, search_date):
 
 def extract_content(url):
     """
-    Extrai o texto principal de uma notícia a partir da URL usando Newspaper3k.
-    Tenta baixar e parsear o conteúdo, logando erros se ocorrerem.
+    Extrai o texto principal de uma notícia a partir da URL.
+    Usa Newspaper3k e, se falhar, tenta Selenium como fallback. Loga erros em caso de falha.
     """
     article = Article(url)
+    # 1. Tenta download usando o Newspaper3k
     try:
         article.download()
-    except Exception as e:
-        try:
-            response = requests.get(url, verify=False)
-            article.set_html(response.text)
-        except Exception as e2:
-            logger.error(f"Error downloading content: {e2} | URL: {url}")
-            return None
-    try:
         article.parse()
-        return article.text
+        if article.text and len(article.text.strip()) > 0:
+            return article.text
     except Exception as e:
-        logger.error(f"Error extracting text: {e} | URL: {url}")
+        pass
+    # 2. Fallback: Selenium sempre que o Newspaper3k falhar
+    try:
+        logger.info(f"Tentando Selenium para extrair conteúdo: {url}")
+        chrome_options = Options()
+        chrome_options.add_argument('--headless')
+        chrome_options.add_argument('--disable-gpu')
+        chrome_options.add_argument('--no-sandbox')
+        chrome_options.add_argument('--disable-dev-shm-usage')
+        chrome_options.add_argument('--window-size=1920,1080')
+        chrome_options.add_argument('--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')
+        driver = webdriver.Chrome(options=chrome_options)
+        driver.get(url)
+        html = driver.page_source
+        article.set_html(html)
+        driver.quit()
+        article.parse()
+        if article.text and len(article.text.strip()) > 0:
+            return article.text
+    except Exception as e3:
+        logger.error(f"Error downloading content (Selenium fallback): {e3} | URL: {url}")
         return None
+    logger.error(f"Error extracting text: Não foi possível extrair conteúdo de nenhuma forma | URL: {url}")
+    return None
 
 
 def fetch_google_news(term, api_key):
     """
-    Busca notícias no Google News via SerpApi para um termo específico.
+    Busca notícias no Google News via SerpApi para um termo.
     Retorna lista de dicionários com dados das notícias.
     """
     params = {
@@ -90,7 +108,7 @@ def fetch_google_news(term, api_key):
 
 def fetch_bing_news(term, api_key):
     """
-    Busca notícias no Bing News via SerpApi para um termo específico.
+    Busca notícias no Bing News via SerpApi para um termo.
     Retorna lista de dicionários com dados das notícias.
     """
     params = {
@@ -167,8 +185,8 @@ def fetch_and_extract_news(max_news):
 
 def process_news(max_news=50):
     """
-    Orquestra o pipeline de busca, extração e inserção de notícias na base raw_news.
-    Loga quantidade de inseridas e duplicadas.
+    Executa o pipeline de busca, extração e inserção de notícias na tabela raw_news.
+    Loga o total de inseridas e duplicadas.
     """
     logger.info("Buscando notícias...")
     news_list = fetch_and_extract_news(max_news=max_news)
