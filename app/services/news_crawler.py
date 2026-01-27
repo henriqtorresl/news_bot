@@ -78,7 +78,8 @@ def fetch_google_news(term, api_key):
     params = {
         "engine": "google_news",
         "q": term,
-        "hl": "pt",
+        "hl": "pt-br",
+        "gl": "br",
         "api_key": api_key
     }
     try:
@@ -114,7 +115,7 @@ def fetch_bing_news(term, api_key):
     params = {
         "engine": "bing_news",
         "q": term,
-        "mkt": "pt-br",
+        "mkt": "pt-BR",
         "qft": "sortbydate='1'",
         "api_key": api_key
     }
