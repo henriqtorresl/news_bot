@@ -71,21 +71,11 @@ def process_and_save_relevant_news():
     for group in groups:
         ids = group.get('ids', [])
         tema = group.get('tema', 'Tema não identificado')
-        headlines = []
-        summaries = []
-        urls = []
-        titles = []
-        published_ats = []
-        sources = []
-        for nid in ids:
-            n = next((x for x in news_list if x['id'] == nid), None)
-            if n:
-                headlines.append(n['title'])
-                summaries.append(n['raw_content'][:500])
-                urls.append(n['url'])
-                titles.append(n['title'])
-                published_ats.append(str(n.get('published_at', '')))
-                sources.append(str(n.get('source', '')))
+        # Coleta dados individuais das notícias do grupo
+        news_in_group = [n for n in news_list if n['id'] in ids]
+        headlines = [n['title'] for n in news_in_group]
+        summaries = [n['raw_content'][:500] for n in news_in_group]
+        # Prompt para o grupo
         prompt = (
             f"Gere um headline (máx 120 caracteres) e um resumo (máx 250 tokens) para o grupo de notícias sobre '{tema}'.\n"
             "Responda EXATAMENTE neste formato, cada item em uma linha separada, sem texto extra:\n"
@@ -116,15 +106,16 @@ def process_and_save_relevant_news():
         except Exception as e:
             headline = f"Erro IA: {e}"
             ai_summary = f"Erro IA: {e}"
-        insert_relevant_news({
-            'original_ids': ids,
-            'original_urls': urls,
-            'original_titles': titles,
-            'published_ats': published_ats,
-            'sources': sources,
-            'tema': tema,
-            'headline': headline,
-            'ai_summary': ai_summary,
-            'status': 'pending'
-        })
-        logger.info(f"Grupo '{tema}' salvo em relevant_news com {len(ids)} notícias.")
+        for n in news_in_group:
+            insert_relevant_news({
+                'original_ids': [n['id']],
+                'original_urls': [n['url']],
+                'original_titles': [n['title']],
+                'published_at': str(n.get('published_at', '')) if n.get('published_at', '') else None,
+                'sources': [str(n.get('source', ''))],
+                'tema': tema,
+                'headline': headline,
+                'ai_summary': ai_summary,
+                'status': 'pending'
+            })
+        logger.info(f"Grupo '{tema}' salvo em relevant_news com {len(news_in_group)} notícias.")

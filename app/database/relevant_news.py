@@ -16,17 +16,17 @@ def insert_relevant_news(news_group):
     try:
         original_urls = news_group.get('original_urls', [])
         original_titles = news_group.get('original_titles', [])
-        published_ats = news_group.get('published_ats', [])
         sources = news_group.get('sources', [])
+        published_at = news_group.get('published_at')
         if not original_urls:
             logger.error("original_urls não fornecido para o grupo relevante!")
             db.close()
             return
         result = db.execute(query, {
-            "original_url": ', '.join(original_urls),
-            "original_title": ', '.join(original_titles),
-            "published_at": ', '.join(published_ats),
-            "source": ', '.join(sources),
+            "original_url": original_urls[0] if original_urls else None,
+            "original_title": original_titles[0] if original_titles else None,
+            "published_at": published_at if published_at else None,
+            "source": sources[0] if sources else None,
             "topic": news_group.get('tema'),
             "headline": news_group.get('headline'),
             "ai_summary": news_group.get('ai_summary'),
@@ -34,9 +34,9 @@ def insert_relevant_news(news_group):
         })
         db.commit()
         if result.rowcount > 0:
-            logger.info(f"Grupo relevante inserido: {news_group.get('tema')}")
+            logger.info(f"Notícia relevante inserida: {news_group.get('tema')} - {original_urls[0] if original_urls else ''}")
         else:
-            logger.info(f"Grupo relevante já existia, não inserido: {news_group.get('tema')}")
+            logger.info(f"Notícia relevante já existia, não inserida: {news_group.get('tema')} - {original_urls[0] if original_urls else ''}")
     except Exception as e:
         logger.error(f"Erro ao inserir grupo relevante: {e}")
         db.rollback()
