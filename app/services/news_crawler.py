@@ -142,7 +142,7 @@ def fetch_bing_news(term, api_key):
         return []
 
 
-def fetch_and_extract_news(max_news):
+def fetch_and_extract_news():
     """
     Busca notícias usando filtros, remove duplicadas, ordena por data e extrai conteúdo.
     Retorna lista final de notícias para análise/classificação.
@@ -174,7 +174,6 @@ def fetch_and_extract_news(max_news):
                 unique_news.append(n)
         # Ordena por data (mais recente primeiro)
         sorted_news = sorted(unique_news, key=lambda x: x['published_at'] or datetime.min, reverse=True)
-        sorted_news = sorted_news[:max_news]
         # Extrai conteúdo de cada notícia
         for n in sorted_news:
             n['raw_content'] = extract_content(n['url'])
@@ -184,13 +183,13 @@ def fetch_and_extract_news(max_news):
         return []
 
 
-def process_news(max_news=50):
+def process_news():
     """
     Executa o pipeline de busca, extração e inserção de notícias na tabela raw_news.
     Loga o total de inseridas e duplicadas.
     """
     logger.info("Buscando notícias...")
-    news_list = fetch_and_extract_news(max_news=max_news)
+    news_list = fetch_and_extract_news()
     logger.info(f"Total de notícias encontradas: {len(news_list)}")
 
     inserted = 0

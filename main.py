@@ -15,7 +15,7 @@ if __name__ == "__main__":
             raise Exception("Falha na conexão com o banco de dados.")
 
         print("\n=== ETAPA 1: Busca de notícias ===\n")
-        process_news(max_news=100)
+        process_news()
 
         print("\n=== ETAPA 2: Classificação de notícias ===\n")
         classify_and_update_all()
