@@ -8,6 +8,7 @@ class Environments:
     GOOGLE_NEWS_API_KEY = os.getenv("GOOGLE_NEWS_API_KEY")
     BING_NEWS_API_KEY = os.getenv("BING_NEWS_API_KEY")
     OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+    ALERTA_LICITACAO_API_KEY = os.getenv("ALERTA_LICITACAO_API_KEY")
     
     # E-mail
     MAIL_USER = os.getenv("MAIL_USER")
