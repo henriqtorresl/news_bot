@@ -10,7 +10,7 @@ from selenium.webdriver.chrome.options import Options
 from app.config.logs import logger
 from app.config.environments import env
 from app.database.filters import get_filters
-from app.database.raw_news import insert_raw_news
+from app.database.raw_news import insert_raw_news, get_existing_urls
 
 
 def convert_relative_time(value, search_date):
@@ -228,10 +228,16 @@ def fetch_and_extract_news():
                 unique_news.append(n)
         # Ordena por data (mais recente primeiro)
         sorted_news = sorted(unique_news, key=lambda x: x['published_at'] or datetime.min, reverse=True)
+
+        existing_urls = get_existing_urls()
         # Extrai conteúdo de cada notícia
         for n in sorted_news:
-            # Fazer uma validação aqui para não realizar o extract de notícias que eu ja tenho na minha base...
+            if n['url'] in existing_urls:
+                logger.info(f"Pulei extração: notícia já existe na base ({n['title']} | {n['url']})")
+                continue
+            
             n['raw_content'] = n['raw_content'] or extract_content(n['url'])
+            
         return sorted_news
     except Exception as e:
         logger.error(f"Erro inesperado em fetch_and_extract_news: {e}")
