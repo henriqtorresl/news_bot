@@ -62,6 +62,16 @@ def update_news_relevance(news_id, relevance, context):
 		db.close()
 
 
+def get_existing_urls():
+    db = Session()
+    query = text("SELECT url FROM raw_news")
+    try:
+        result = db.execute(query)
+        return set(row[0] for row in result)
+    finally:
+        db.close()
+		
+
 def get_relevant_news():
 	db = Session()
 	query = text("""
