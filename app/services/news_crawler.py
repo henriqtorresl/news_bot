@@ -142,6 +142,57 @@ def fetch_bing_news(term, api_key):
         return []
 
 
+def fetch_alerta_licitacao(term, api_key): # Validar se a lógica faz sentido
+    """
+    Busca licitações via API Alerta Licitação.
+    Mapeia o retorno para o formato padrão do sistema.
+    """
+    url = "https://alertalicitacao.com.br/api/v1/licitacoesAbertas/"
+    
+    headers = {
+        "Token": api_key
+    }
+    
+    params = {
+        "palavra_chave": term,
+        "licitacoesPorPagina": 100
+    }
+
+    try:
+        response = requests.get(url, headers=headers, params=params)
+        
+        if response.status_code != 200:
+            logger.error(f"Erro API Alerta Licitação: {response.status_code} - {response.text}")
+            return []
+
+        data = response.json()
+        licitacoes = data.get("licitacoes", [])
+        
+        results = []
+        for lic in licitacoes:
+            pub_date = None
+            if lic.get("data_insercao"):
+                try:
+                    pub_date = datetime.strptime(lic.get("data_insercao"), "%Y-%m-%d")
+                except:
+                    pass
+
+            results.append({
+                'published_at': pub_date,
+                'title': lic.get('titulo'),
+                'source': f"Licitação - {lic.get('orgao')}",
+                'url': lic.get('link'),
+                'search_engine': 'alerta_licitacao',
+                'raw_content': f"Modalidade: {lic.get('tipo')}. Objeto: {lic.get('objeto')}. Município: {lic.get('municipio')}-{lic.get('uf')}"
+            })
+            
+        return results
+
+    except Exception as e:
+        logger.error(f"Error fetching Alerta Licitação: {e}")
+        return []
+
+
 def fetch_and_extract_news():
     """
     Busca notícias usando filtros, remove duplicadas, ordena por data e extrai conteúdo.
@@ -150,8 +201,9 @@ def fetch_and_extract_news():
     try:
         google_api_key = env.GOOGLE_NEWS_API_KEY
         bing_api_key = env.BING_NEWS_API_KEY
+        alerta_api_key = env.ALERTA_LICITACAO_API_KEY
 
-        if not google_api_key or not bing_api_key:
+        if not google_api_key or not bing_api_key or not alerta_api_key:
             raise ValueError("Google News API key and Bing News API key must be provided.")
 
         terms = get_filters()
@@ -163,8 +215,10 @@ def fetch_and_extract_news():
         for term in terms:
             google_news = fetch_google_news(term, google_api_key)
             bing_news = fetch_bing_news(term, bing_api_key)
+            # licitacoes = fetch_alerta_licitacao(term, alerta_api_key)
             all_news.extend(google_news)
             all_news.extend(bing_news)
+            # all_news.extend(licitacoes)
         # Deduplicação por URL
         seen_urls = set()
         unique_news = []
@@ -176,7 +230,9 @@ def fetch_and_extract_news():
         sorted_news = sorted(unique_news, key=lambda x: x['published_at'] or datetime.min, reverse=True)
         # Extrai conteúdo de cada notícia
         for n in sorted_news:
-            n['raw_content'] = extract_content(n['url'])
+            # Fazer uma validação aqui para não realizar o extract de notícias que eu ja tenho na minha base...
+            # Talvez seja válido aplicar um range na serp api e na api de alerta de licitações para buscar noticias com range de um dia (do ultimo dia)
+            n['raw_content'] = n['raw_content'] or extract_content(n['url'])
         return sorted_news
     except Exception as e:
         logger.error(f"Erro inesperado em fetch_and_extract_news: {e}")
