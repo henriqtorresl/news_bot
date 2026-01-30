@@ -77,7 +77,7 @@ def fetch_google_news(term, api_key):
     """
     params = {
         "engine": "google_news",
-        "q": term,
+        "q": term + " when:1d", # último dia
         "hl": "pt-br",
         "gl": "br",
         "api_key": api_key
@@ -116,7 +116,7 @@ def fetch_bing_news(term, api_key):
         "engine": "bing_news",
         "q": term,
         "mkt": "pt-BR",
-        "qft": "sortbydate='1'",
+        "qft": "interval=\"7\"", # últimas 24 horas
         "api_key": api_key
     }
     try:
@@ -231,7 +231,6 @@ def fetch_and_extract_news():
         # Extrai conteúdo de cada notícia
         for n in sorted_news:
             # Fazer uma validação aqui para não realizar o extract de notícias que eu ja tenho na minha base...
-            # Talvez seja válido aplicar um range na serp api e na api de alerta de licitações para buscar noticias com range de um dia (do ultimo dia)
             n['raw_content'] = n['raw_content'] or extract_content(n['url'])
         return sorted_news
     except Exception as e:
