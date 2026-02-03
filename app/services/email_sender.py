@@ -55,10 +55,10 @@ def send_newsletter_email():
                         pass
                 fonte = n.get('source', '')
                 html += (
-                    f'<li style="font-size: 14px; font-weight: normal; color: #555;">'
-                    f'<a href="{n.get('original_url','')}" style="color: #1a73e8; text-decoration: none; font-size: 14px;">{n.get('original_title','')}</a> '
-                    f'(Fonte: <span style="font-size: 12px; color: #777;">{fonte} - {dt}</span>)'
-                    f'</li>'
+                    f"<li style='font-size: 14px; font-weight: normal; color: #555;'>"
+                    f"<a href=\"{n.get('original_url','')}\" style='color: #1a73e8; text-decoration: none; font-size: 14px;'>{n.get('original_title','')}</a> "
+                    f"(Fonte: <span style='font-size: 12px; color: #777;'>{fonte} - {dt}</span>)"
+                    f"</li>"
                 )
             html += '</ul><br>'
         msg = MIMEMultipart("alternative")
