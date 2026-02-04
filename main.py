@@ -28,4 +28,4 @@ if __name__ == "__main__":
 
         print("\n==============================\nPIPELINE FINALIZADO COM SUCESSO\n==============================\n")
     except Exception as e:
-        logger.error(f"\n[ERRO FATAL] Erro ao rodar o bot de notícias: {e}\n")
+        logger.error(f"Erro ao rodar o bot de notícias: {e}\n")
