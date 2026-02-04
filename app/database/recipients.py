@@ -16,3 +16,17 @@ def get_recipient_emails():
         return None
     finally:
         db.close()
+
+
+def get_recipients():
+    db = Session()
+    query = text("SELECT name, email FROM recipients WHERE is_active = true")
+    try:
+        result = db.execute(query)
+        recipients = result.fetchall()
+        return [row[0] for row in recipients]
+    except Exception as e:
+        logger.error(f"Erro ao buscar os emails dos destinatários: {e}")
+        return None
+    finally:
+        db.close()
