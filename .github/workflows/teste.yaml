@@ -31,4 +31,4 @@ jobs:
       - name: Run specific schedule script
         run: |
           # Executa o seu arquivo Python na rota especificada
-          python app/schedules/teste.py
+          python -m app.schedules.teste
