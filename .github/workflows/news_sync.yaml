@@ -30,5 +30,5 @@ jobs:
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-      - name: Run Sync
+      - name: Run Pipeline
         run: python -m app.schedules.sync_news
