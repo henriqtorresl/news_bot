@@ -47,3 +47,25 @@
    ```
 
 Pronto! O projeto estará rodando.
+
+## Automação (GitHub Actions)
+
+Embora o comando `python main.py` execute toda a pipeline localmente para testes, em ambiente de produção a lógica é dividida em dois fluxos automatizados via **GitHub Actions**, garantindo que o processamento e o disparo ocorram em horários estratégicos:
+
+### 1. Sincronização e Processamento (`sync_news.yml`)
+
+Este workflow é responsável pelas etapas de **Busca (Crawler)**, **Classificação (AI)** e **Agrupamento** das notícias no banco de dados.
+
+- **Frequência:** 2 vezes ao dia.
+- **Horários:** 06:00 e 18:00 (Horário de Brasília).
+- **Script executado:** `app/schedules/sync_news.py`
+
+### 2. Disparo de Newsletter (`send_newsletter.yml`)
+
+Este workflow filtra as notícias relevantes processadas que ainda não foram enviadas e realiza o disparo do e-mail para os usuários.
+
+- **Frequência:** 1 vez ao dia.
+- **Horário:** 08:00 (Horário de Brasília).
+- **Script executado:** `app/schedules/send_newsletter.py`
+
+> **Nota:** Os horários nos arquivos YAML estão configurados em **UTC** (09:00, 21:00 e 11:00, respectivamente) para corresponderem ao fuso horário de Brasília (UTC-3).
