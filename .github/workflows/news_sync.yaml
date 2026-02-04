@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  sync:
+  pipeline:
     runs-on: ubuntu-latest
 
     env:
@@ -15,7 +15,7 @@ jobs:
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       GOOGLE_NEWS_API_KEY: ${{ secrets.GOOGLE_NEWS_API_KEY }}
       BING_NEWS_API_KEY: ${{ secrets.BING_NEWS_API_KEY }}
-      ALERTA_LICITACAO_API_KEY: ${{ secrets.secrets.ALERTA_LICITACAO_API_KEY }}
+      ALERTA_LICITACAO_API_KEY: ${{ secrets.ALERTA_LICITACAO_API_KEY }}
 
     steps:
       - uses: actions/checkout@v4
